@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell, clipboard, dialog, Tray, Menu, nativeImage, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { exec } = require('child_process');
 const WatcherEngine = require('./watcher-engine');
 
 let mainWindow = null;
@@ -480,7 +481,24 @@ ipcMain.on('dismiss-popup', () => {
 ipcMain.handle('open-in-explorer', async (event, targetPath) => {
   if (!targetPath) return false;
   try {
-    const normPath = path.normalize(targetPath);
+    let normPath = path.normalize(targetPath);
+
+    // Se o caminho começar com \ mas não tiver letra de unidade, tenta resolver com o drive atual ou D:
+    if (!/^[a-zA-Z]:[\\/]/.test(normPath) && !normPath.startsWith('\\\\')) {
+      const currentDrive = path.parse(process.cwd()).root || 'C:\\';
+      const cleanRel = normPath.replace(/^[\\/]+/, '');
+      const possiblePath1 = path.join(currentDrive, cleanRel);
+      const possiblePath2 = path.join('D:\\', cleanRel);
+      
+      if (fs.existsSync(possiblePath1)) {
+        normPath = possiblePath1;
+      } else if (fs.existsSync(possiblePath2)) {
+        normPath = possiblePath2;
+      } else {
+        normPath = path.resolve(normPath);
+      }
+    }
+
     if (fs.existsSync(normPath)) {
       const stats = fs.statSync(normPath);
       if (stats.isDirectory()) {
@@ -500,8 +518,10 @@ ipcMain.handle('open-in-explorer', async (event, targetPath) => {
   } catch (err) {
     try {
       const fallbackDir = path.dirname(targetPath);
-      exec(`explorer.exe "${fallbackDir}"`);
-      return true;
+      if (fs.existsSync(fallbackDir)) {
+        exec(`explorer.exe "${fallbackDir}"`);
+        return true;
+      }
     } catch (e) {}
   }
   return false;

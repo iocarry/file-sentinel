@@ -13,12 +13,16 @@ class WatcherEngine extends EventEmitter {
     this.debounceMs = 300;
     
     this.userHome = os.homedir();
+    
+    // Detecta pasta Antigravity dinamicamente (seja em D:, E: ou no diretório atual)
+    const possibleAntigravity = ['D:\\Antigravity', 'E:\\Antigravity', path.resolve(__dirname, '..')].find(p => fs.existsSync(p));
+
     this.defaultFolders = [
       path.join(this.userHome, 'Desktop'),
       path.join(this.userHome, 'Documents'),
       path.join(this.userHome, 'Downloads'),
       path.join(this.userHome, 'Pictures'),
-      'E:\\Antigravity'
+      ...(possibleAntigravity ? [possibleAntigravity] : [])
     ];
 
     this.foldersToWatch = options.folders || this.defaultFolders;
@@ -150,7 +154,16 @@ class WatcherEngine extends EventEmitter {
       const watcher = fs.watch(targetPath, { recursive: true }, (eventType, filename) => {
         if (!filename || !this.isMonitoring) return;
 
-        const fullPath = path.isAbsolute(filename) ? filename : path.join(targetPath, filename);
+        // Garante que o caminho sempre inclua a unidade de disco (ex: D:)
+        const isFullyQualified = /^[a-zA-Z]:[\\/]/.test(filename) || filename.startsWith('\\\\');
+        let fullPath;
+        if (isFullyQualified) {
+          fullPath = path.normalize(filename);
+        } else {
+          const cleanRel = filename.replace(/^[\\/]+/, '');
+          fullPath = path.normalize(path.join(targetPath, cleanRel));
+        }
+
         this.handleRawEvent(eventType, fullPath);
       });
 
