@@ -115,7 +115,6 @@ function createPopupWindow() {
     backgroundColor: '#00000000',
     alwaysOnTop: true,
     skipTaskbar: true,
-    focusable: false,
     resizable: false,
     show: false,
     webPreferences: {
@@ -248,10 +247,7 @@ function createTray() {
     {
       label: '🛡️ Abrir / Exibir FileSentinel HUD',
       click: () => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.show();
-          mainWindow.focus();
-        }
+        showMainWindow();
       }
     },
     {
@@ -391,12 +387,11 @@ function createTray() {
 
   tray.on('click', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      if (mainWindow.isVisible()) {
+      if (mainWindow.isVisible() && !mainWindow.isMinimized()) {
         saveBounds();
         mainWindow.hide();
       } else {
-        mainWindow.show();
-        mainWindow.focus();
+        showMainWindow();
       }
     }
   });
@@ -460,15 +455,22 @@ app.whenReady().then(() => {
   });
 });
 
+function showMainWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    mainWindow.show();
+    mainWindow.focus();
+  }
+}
+
 // IPC Pop-in Customizado
 ipcMain.on('popup-clicked', () => {
   if (popupWindow && !popupWindow.isDestroyed()) {
     popupWindow.hide();
   }
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.show();
-    mainWindow.focus();
-  }
+  showMainWindow();
 });
 
 ipcMain.on('dismiss-popup', () => {

@@ -224,16 +224,17 @@
       popTime.textContent = data.timestamp || new Date().toLocaleTimeString('pt-BR');
     });
 
-    document.getElementById('popup-card').addEventListener('click', (e) => {
-      if (e.target.id === 'btn-close-pop') {
-        e.stopPropagation();
-        ipcRenderer.send('dismiss-popup');
+    const cardEl = document.getElementById('popup-card');
+    const btnClose = document.getElementById('btn-close-pop');
+
+    cardEl.addEventListener('click', (e) => {
+      if (e.target === btnClose || btnClose.contains(e.target)) {
         return;
       }
       ipcRenderer.send('popup-clicked');
     });
 
-    document.getElementById('btn-close-pop').addEventListener('click', (e) => {
+    btnClose.addEventListener('click', (e) => {
       e.stopPropagation();
       ipcRenderer.send('dismiss-popup');
     });
