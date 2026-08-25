@@ -1,0 +1,22 @@
+{
+  "name": "file-sentinel",
+  "version": "1.0.0",
+  "description": "FileSentinel - HUD de Monitoramento de Acesso a Arquivos e Alertas de Segurança para Windows",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "file-sentinel",
+    "security",
+    "file-monitor",
+    "watcher",
+    "electron",
+    "overlay"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.1"
+  }
+}

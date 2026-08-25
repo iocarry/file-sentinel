@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FileSentinel</title>
+  <!-- Google Fonts: Inter e JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="hud-container">
+    
+    <!-- Barra Superior / Header (Arrastável) -->
+    <header class="hud-header">
+      <div class="header-drag-zone">
+        <div class="brand-badge">
+          <div class="radar-dot" id="live-indicator"></div>
+          <svg class="shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <div class="title-group">
+            <span class="app-title">FileSentinel</span>
+            <span class="app-sub">WATCHER LIVE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações de Janela e Controle (Enxuto e sem corte) -->
+      <div class="window-controls">
+        <button id="btn-audit" class="btn-icon" title="🧪 Iniciar Auditoria de Instalação (Dossiê Forense para IA)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.69 19.3A2 2 0 0 0 6.4 22h11.2a2 2 0 0 0 1.71-2.7L14 9.31V2M8.5 2h7M14 9.3a6.5 6.5 0 0 1-4 0"/></svg>
+        </button>
+        <button id="btn-tools-toggle" class="btn-icon" title="⚙️ Menu de Ferramentas & Ajustes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+        <button id="btn-pin" class="btn-icon active" title="Sempre no Topo">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+        </button>
+        <button id="btn-minimize" class="btn-icon" title="Minimizar">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>
+        </button>
+        <button id="btn-close" class="btn-icon btn-close" title="Fechar (Ocultar na Bandeja)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menu Popover Flutuante de Ferramentas & Ajustes -->
+    <div id="popover-tools" class="popover-tools hidden">
+      <div class="popover-section-title">Ajustes Rápidos</div>
+      <button id="btn-sound" class="popover-item">
+        <span class="popover-icon-box">
+          <svg id="icon-sound-on" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          <svg id="icon-sound-off" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+        </span>
+        <span class="popover-label">Efeitos Sonoros</span>
+        <span class="popover-state-badge" id="sound-state-badge">Ligado</span>
+      </button>
+
+      <button id="btn-view-mode" class="popover-item">
+        <span class="popover-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </span>
+        <span class="popover-label">Densidade do Feed</span>
+        <span class="popover-state-badge" id="layout-state-badge">Expandido</span>
+      </button>
+
+      <div class="popover-divider"></div>
+      <div class="popover-section-title">Gerenciamento</div>
+
+      <button id="btn-presets" class="popover-item">
+        <span class="popover-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+        </span>
+        <span class="popover-label">Presets & Discos</span>
+      </button>
+
+      <button id="btn-whitelist" class="popover-item">
+        <span class="popover-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </span>
+        <span class="popover-label">Programas Confiáveis</span>
+      </button>
+
+      <div class="popover-divider"></div>
+      <div class="popover-section-title">Ações do Feed</div>
+
+      <button id="btn-pause" class="popover-item">
+        <span class="popover-icon-box">
+          <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          <svg id="icon-play" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </span>
+        <span class="popover-label" id="pause-label">Pausar Feed</span>
+      </button>
+
+      <button id="btn-clear" class="popover-item">
+        <span class="popover-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </span>
+        <span class="popover-label">Limpar Histórico</span>
+      </button>
+
+      <button id="btn-export" class="popover-item">
+        <span class="popover-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </span>
+        <span class="popover-label">Exportar Relatório (CSV)</span>
+      </button>
+    </div>
+    </header>
+
+    <!-- Barra de Filtros e Busca Rápida -->
+    <div class="filter-bar">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Filtrar por processo, arquivo ou extensão...">
+      </div>
+      <div class="filter-chips">
+        <button class="chip active" data-filter="all">Todos (<span id="count-all">0</span>)</button>
+        <button class="chip chip-create" data-filter="CREATE">Criados (<span id="count-create">0</span>)</button>
+        <button class="chip chip-modify" data-filter="MODIFY">Modificados (<span id="count-modify">0</span>)</button>
+        <button class="chip chip-delete" data-filter="DELETE">Excluídos (<span id="count-delete">0</span>)</button>
+        <button class="chip chip-alert" data-filter="ALERT">🚨 Alertas (<span id="count-alert">0</span>)</button>
+      </div>
+    </div>
+
+    <!-- Banner Ativo de Modo Auditoria de Instalação -->
+    <div id="audit-banner" class="audit-recording-banner hidden">
+      <div class="audit-banner-left">
+        <span class="audit-pulse-dot"></span>
+        <div class="audit-banner-info">
+          <span class="audit-banner-title">AUDITORIA DE INSTALAÇÃO ATIVA</span>
+          <span class="audit-banner-sub" id="audit-counter-badge">Gravando ações em tempo real...</span>
+        </div>
+      </div>
+      <button id="btn-finish-audit" class="btn-finish-audit">🏁 Concluir e Gerar Dossiê IA</button>
+    </div>
+
+    <!-- Feed de Atividades em Tempo Real -->
+    <main class="feed-container" id="feed-container">
+      <!-- Estado Vazio / Scanner Ativo -->
+      <div class="empty-state" id="empty-state">
+        <div class="radar-scan-anim">
+          <div class="circle c1"></div>
+          <div class="circle c2"></div>
+          <div class="circle c3"></div>
+          <div class="scan-beam"></div>
+        </div>
+        <p class="empty-title">Vigilância em Tempo Real Ativa</p>
+        <p class="empty-desc">Nenhum evento registrado ainda. Qualquer acesso ou modificação em suas pastas aparecerá aqui instantaneamente.</p>
+      </div>
+    </main>
+
+    <!-- Rodapé / Status Bar -->
+    <footer class="hud-footer">
+      <div class="footer-status">
+        <button class="status-pill-btn" id="folder-count-badge" title="Clique para configurar pastas">5 Pastas Vigiadas ⚙️</button>
+        <span class="paused-badge hidden" id="paused-indicator">⏸️ FEED PAUSADO</span>
+      </div>
+      <div class="footer-controls">
+        <label for="opacity-range" class="opacity-label">Opacidade:</label>
+        <input type="range" id="opacity-range" min="30" max="100" value="95">
+        <span id="opacity-val">95%</span>
+      </div>
+    </footer>
+
+    <!-- Modal de Presets & Gerenciamento de Pastas -->
+    <div id="modal-presets" class="modal-overlay hidden">
+      <div class="modal-card modal-card-large">
+        <div class="modal-header">
+          <span class="modal-title">💾 Presets de Monitoramento & Discos</span>
+          <button id="btn-close-presets" class="btn-icon">✖️</button>
+        </div>
+
+        <div class="alert-box-warning">
+          <div class="alert-box-header">
+            <span class="alert-icon">⚠️</span>
+            <strong>Aviso de Desempenho (Disco C:\)</strong>
+          </div>
+          <p class="alert-box-text">
+            O disco <code>C:\</code> contém milhares de gravações contínuas de telemetria e logs internos do Windows. 
+            <strong>Não recomendamos monitorar o C:\ inteiro</strong> para evitar alto consumo de CPU. 
+            Mantenha o <code>C:\</code> no modo <em>Essencial (Pastas do Usuário)</em> e selecione seus <strong>HDs/SSDs secundários</strong> livremente com impacto zero!
+          </p>
+        </div>
+
+        <div class="presets-section">
+          <span class="section-label">Modos Rápidos:</span>
+          <div class="preset-buttons-row">
+            <button id="btn-preset-essential" class="btn-preset active">
+              🛡️ Modo Essencial (Recomendado)
+              <small>Desktop, Documentos, Downloads, Imagens e Projetos</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="drives-section">
+          <span class="section-label">Unidades de Disco Detectadas:</span>
+          <div class="drives-list" id="drives-list">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <div class="custom-folders-section">
+          <div class="section-header-row">
+            <span class="section-label">Pastas Ativas na Vigilância:</span>
+            <button id="btn-add-custom-folder" class="btn-action-small">➕ Adicionar Outra Pasta</button>
+          </div>
+          <div class="active-folders-list" id="active-folders-list">
+            <!-- Lista com botão de remover individual -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal de Lista Branca (Whitelist) -->
+    <div id="modal-whitelist" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <span class="modal-title">🛡️ Programas Confiáveis (Whitelist)</span>
+          <button id="btn-close-modal" class="btn-icon">✖️</button>
+        </div>
+        <p class="modal-desc">Processos cadastrados aqui não disparam alertas intrusivos nem pop-ups.</p>
+        
+        <div class="whitelist-input-row">
+          <input type="text" id="whitelist-input" placeholder="Ex: AfterEffects.exe, Chrome.exe...">
+          <button id="btn-add-whitelist" class="btn-primary">Adicionar</button>
+        </div>
+
+        <div class="whitelist-list" id="whitelist-list">
+          <!-- Itens dinâmicos -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Dossiê Forense de Instalação -->
+    <div id="modal-audit" class="modal-overlay hidden">
+      <div class="modal-card modal-card-large">
+        <div class="modal-header">
+          <span class="modal-title">🧪 Dossiê Forense de Instalação</span>
+          <button id="btn-close-audit-modal" class="btn-icon">✖️</button>
+        </div>
+
+        <p class="modal-desc">Relatório compilado para análise de segurança com Inteligência Artificial.</p>
+
+        <div class="audit-summary-grid">
+          <div class="audit-metric-card">
+            <span class="metric-val" id="metric-executables">0</span>
+            <span class="metric-label">Executáveis / Scripts</span>
+          </div>
+          <div class="audit-metric-card">
+            <span class="metric-val" id="metric-startup">0</span>
+            <span class="metric-label">Persistência / Startup</span>
+          </div>
+          <div class="audit-metric-card">
+            <span class="metric-val" id="metric-userfiles">0</span>
+            <span class="metric-label">Arquivos Pessoais</span>
+          </div>
+        </div>
+
+        <div class="dossier-ai-box">
+          <div class="dossier-ai-header">
+            <span>🤖 Prompt Formatado para IA (Copie e Cole):</span>
+            <button id="btn-copy-dossier" class="btn-action-small">📋 Copiar Prompt IA</button>
+          </div>
+          <textarea id="dossier-textarea" readonly class="dossier-textarea"></textarea>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button id="btn-save-dossier" class="btn-action-small">💾 Salvar Relatório (.txt)</button>
+          <button id="btn-done-audit" class="btn-primary">Concluído</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Flutuante -->
+    <div id="toast" class="toast hidden">Caminho copiado com sucesso!</div>
+
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
